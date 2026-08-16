@@ -41,7 +41,7 @@ export function resolveAssetBase(explicit?: string): string | null {
   }
   try {
     // ESM builds: resolve relative to this module.
-    return new URL('.', import.meta.url).href.replace(/\/+$/, '');
+    return new URL(/* @vite-ignore */ '.', import.meta.url).href.replace(/\/+$/, '');
   } catch {
     return null;
   }

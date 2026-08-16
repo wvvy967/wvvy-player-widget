@@ -25,10 +25,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@components': resolve(__dirname, 'src/components'),
-      '@lib': resolve(__dirname, 'src/lib'),
-      '@tests': resolve(__dirname, 'src/tests')
+      '@': resolve(import.meta.dirname, 'src'),
+      '@components': resolve(import.meta.dirname, 'src/components'),
+      '@lib': resolve(import.meta.dirname, 'src/lib'),
+      '@tests': resolve(import.meta.dirname, 'src/tests')
     }
   },
   plugins: [

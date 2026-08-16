@@ -27,10 +27,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@components': resolve(__dirname, 'src/components'),
-      '@lib': resolve(__dirname, 'src/lib'),
-      '@tests': resolve(__dirname, 'src/tests')
+      '@': resolve(import.meta.dirname, 'src'),
+      '@components': resolve(import.meta.dirname, 'src/components'),
+      '@lib': resolve(import.meta.dirname, 'src/lib'),
+      '@tests': resolve(import.meta.dirname, 'src/tests')
     }
   },
   // vite-env.d.ts is in the dts scope so the `*.css?inline` module declaration
@@ -38,7 +38,7 @@ export default defineConfig({
   plugins: [tailwindcss(), svelte(), dts({ include: ['src/module.ts', 'src/types/index.ts', 'src/vite-env.d.ts'], outDir: 'dist', rollupTypes: true })],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/module.ts'),
+      entry: resolve(import.meta.dirname, 'src/module.ts'),
       formats: ['es'],
       fileName: 'module'
     },

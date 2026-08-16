@@ -1,0 +1,59 @@
+name: Reusable Tests
+
+on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout 🛒
+        uses: actions/checkout@v7
+      - name: node 24 ❇️
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - name: install dependencies 📦
+        run: npm ci
+      - name: lint 🧹
+        run: npm run lint
+      - name: unit tests 🧪
+        run: npm run coverage
+      - name: build 📦
+        run: npm run build
+      # The bundle is useless if the stylesheet doesn't travel inside it —
+      # `app.css?inline` silently yields an empty string when the Tailwind plugin
+      # pipeline changes, and nothing else in CI would notice.
+      - name: verify CSS is bundled 🎨
+        run: |
+          node -e "
+            const s = require('fs').readFileSync('dist/player.js', 'utf8');
+            for (const probe of ['--tw-border-style', '.bg-ink', ':host', '@container']) {
+              if (!s.includes(probe)) { console.error('missing from bundle: ' + probe); process.exit(1); }
+            }
+            console.log('stylesheet present in bundle');
+          "
+      - name: verify package types resolve 🔎
+        run: |
+          mkdir -p /tmp/consumer && cd /tmp/consumer
+          cat > check.ts <<'EOF'
+          import { mountPlayerWidget, type PlayerWidgetConfig, type WidgetHandle } from '${{ github.workspace }}/dist/module.js';
+          const cfg: PlayerWidgetConfig = { station: 'https://radio.wvvy.org', variant: 'card' };
+          const w: WidgetHandle = mountPlayerWidget(document.body, cfg);
+          w.destroy();
+          EOF
+          "${{ github.workspace }}/node_modules/.bin/tsc" --noEmit --strict --target ESNext \
+            --module ESNext --moduleResolution bundler --lib ESNext,DOM check.ts
+      - name: upload coverage to Codecov 📊
+        if: always()
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage/cobertura-coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
