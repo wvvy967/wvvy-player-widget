@@ -133,7 +133,7 @@
         {/if}
         <span class="text-bone/85 text-[12px] @[440px]:text-[13px]">
           {#if entry.start}<span class="text-muted">{entry.start}</span>{/if}
-          {entry.name}{#if entry.presenter}<span class="text-muted"> · {entry.presenter}</span>{/if}
+          {entry.name}{#if entry.presenter}<span class="text-muted">&nbsp;· {entry.presenter}</span>{/if}
         </span>
       {/each}
     </div>

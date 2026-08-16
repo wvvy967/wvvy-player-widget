@@ -306,6 +306,7 @@ const widget = mountPlayerWidget(document.getElementById('player'), {
           <tr><td>data-link-label</td><td>Full player and schedule →</td><td>Label for that link.</td></tr>
           <tr><td>data-show-dial</td><td>true</td><td>FM dial on the card. Needs <code>data-frequency</code>.</td></tr>
           <tr><td>data-show-schedule</td><td>true</td><td>Today's schedule strip. Hides itself if the station publishes none.</td></tr>
+          <tr><td>data-schedule-url</td><td>station's AzuraCast</td><td>Fetch the schedule from here instead — any URL returning AzuraCast's schedule JSON, with CORS headers. For a schedule kept outside AzuraCast.</td></tr>
           <tr><td>data-show-listeners</td><td>false</td><td>Live listener count. Off by default; hides itself anyway if the station doesn't publish one.</td></tr>
           <tr><td>data-show-volume</td><td>true</td><td>Volume slider. Always hidden on iOS.</td></tr>
           <tr><td>data-poll-interval</td><td>20</td><td>Metadata poll seconds. Floor of 10.</td></tr>
@@ -360,6 +361,9 @@ const widget = mountPlayerWidget(document.getElementById('player'), {
           name: 'WVVY-LP',
           location: "Tisbury · Martha's Vineyard · 100W",
           tagline: "Martha's Vineyard Community Radio",
+          // WVVY's schedule lives in a Google Sheet, republished in AzuraCast's
+          // schedule shape by a Pages Function on wvvy.org.
+          scheduleUrl: 'https://wvvy.org/api/schedule',
           description: 'No format. No playlist. Volunteer island DJs since 2007.'
         };
       }
@@ -380,6 +384,7 @@ const widget = mountPlayerWidget(document.getElementById('player'), {
         if (opts.accent.toLowerCase() !== defaults.accent) attrs.push('data-accent="' + opts.accent + '"');
         if (opts.frequency) attrs.push('data-frequency="' + opts.frequency + '"');
         attrs.push('data-name="WVVY-LP"');
+        if (opts.variant === 'card') attrs.push('data-schedule-url="https://wvvy.org/api/schedule"');
         attrs.push('data-link="https://wvvy.org"');
 
         $('snippet').textContent = '<div id="wvvy-player"\n  ' + attrs.join('\n  ') + '></div>\n<script src="https://wvvy.org/widget/player.js" async><\/script>';

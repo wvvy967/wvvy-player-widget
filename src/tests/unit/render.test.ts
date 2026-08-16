@@ -214,3 +214,54 @@ describe('album art', () => {
     w.destroy();
   });
 });
+
+describe('schedule source', () => {
+  const today = new Date();
+  const at = (h: number) => Math.floor(new Date(today.getFullYear(), today.getMonth(), today.getDate(), h).getTime() / 1000);
+
+  function stubWithScheduleSpy(scheduleBody: unknown) {
+    const seen: string[] = [];
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+      const url = String(input);
+      seen.push(url);
+      if (url.includes('schedule')) return Promise.resolve(new Response(JSON.stringify(scheduleBody), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify(LIVE_TRACK), { status: 200 }));
+    });
+    return seen;
+  }
+
+  it('defaults to the station’s own AzuraCast schedule', async () => {
+    const seen = stubWithScheduleSpy([]);
+    const { w } = await render({ variant: 'card', station: 'https://radio.test', shortcode: 'abc' });
+    expect(seen.some((u) => u === 'https://radio.test/api/station/abc/schedule')).toBe(true);
+    w.destroy();
+  });
+
+  // Stations whose schedule lives outside AzuraCast publish it in the same shape
+  // and point the widget at it — no station-specific parsing in the widget.
+  it('fetches an explicit scheduleUrl instead when one is given', async () => {
+    const seen = stubWithScheduleSpy([]);
+    const { w } = await render({ variant: 'card', station: 'https://radio.test', shortcode: 'abc', scheduleUrl: 'https://wvvy.org/api/schedule' });
+    expect(seen.some((u) => u.startsWith('https://wvvy.org/api/schedule'))).toBe(true);
+    expect(seen.some((u) => u === 'https://radio.test/api/station/abc/schedule')).toBe(false);
+    w.destroy();
+  });
+
+  it('renders entries from the external feed exactly as AzuraCast ones', async () => {
+    stubWithScheduleSpy([
+      { id: 1, type: 'streamer', name: 'Sunday Sessions', title: 'Sunday Sessions', description: 'Streamer: Ricky Prime', start_timestamp: at(12), end_timestamp: at(14), is_now: false }
+    ]);
+    const { text, w } = await render({ variant: 'card', scheduleUrl: 'https://wvvy.org/api/schedule' });
+    expect(text()).toContain('Sunday Sessions');
+    expect(text()).toContain('Ricky Prime');
+    w.destroy();
+  });
+
+  it('ignores a non-http scheduleUrl rather than fetching it', async () => {
+    const seen = stubWithScheduleSpy([]);
+    const { w } = await render({ variant: 'card', station: 'https://radio.test', shortcode: 'abc', scheduleUrl: 'javascript:alert(1)' });
+    expect(seen.some((u) => u.startsWith('javascript:'))).toBe(false);
+    expect(seen.some((u) => u === 'https://radio.test/api/station/abc/schedule')).toBe(true);
+    w.destroy();
+  });
+});

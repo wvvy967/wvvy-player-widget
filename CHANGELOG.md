@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-16
+
+### Added
+
+- `data-schedule-url` / `scheduleUrl` — fetch the card's schedule from any URL returning AzuraCast's schedule JSON, instead of the station's own `/api/station/{shortcode}/schedule`. For stations whose schedule lives outside AzuraCast, this keeps all the station-specific knowledge in the endpoint rather than in the widget. WVVY's schedule is a Google Sheet republished in that shape by `https://wvvy.org/api/schedule`.
+
+### Fixed
+
+- The presenter never rendered against a real AzuraCast install. `parseSchedule` read a `streamer` field, which AzuraCast's schedule entries don't have — the presenter is encoded in `description` as `"Streamer: <name>"`. That's now the primary source, with `streamer` kept as a fallback for feeds that do provide it.
+- A presenter identical to the entry name is dropped rather than rendered twice. AzuraCast names streamer-type entries after the streamer, so the strip read `DJ WolfDen · DJ WolfDen`.
+
 ## [0.1.1] - 2026-08-16
 
 ### Changed
@@ -48,6 +59,7 @@ and could easily regress:
 - Album art that 404s (AzuraCast reports art URLs for tracks whose media is missing) now falls back to the placeholder instead of rendering a broken-image icon.
 - Truncated display text was clipped by the brutalist theme's `line-height: 0.85`.
 
-[unreleased]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/wvvy967/wvvy-player-widget/releases/tag/v0.1.0

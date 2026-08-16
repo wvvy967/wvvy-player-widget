@@ -111,12 +111,32 @@ export function parseNowPlaying(raw: RawResponse): NowPlayingData {
 type RawScheduleEntry = {
   name?: string;
   title?: string;
+  description?: string;
   start?: string;
   start_timestamp?: number;
   is_now?: boolean;
   streamer?: string;
   playlist?: string;
 };
+
+/**
+ * Pull the presenter out of an entry.
+ *
+ * AzuraCast doesn't expose a `streamer` field on schedule entries — it encodes
+ * the presenter in `description` as `"Streamer: <name>"`. Reading only a
+ * `streamer` key means the DJ never renders against a real install, so the
+ * description is the primary source and `streamer` a courtesy fallback for
+ * feeds that do provide it.
+ *
+ * Returns '' when the presenter merely repeats the entry name, which is what
+ * AzuraCast produces for streamer-type entries — rendering it would give you
+ * "DJ WolfDen · DJ WolfDen".
+ */
+function schedulePresenter(item: RawScheduleEntry, name: string): string {
+  const fromDescription = item?.description?.trim().match(/^streamer:\s*(.+)$/i)?.[1];
+  const presenter = (item?.streamer ?? fromDescription ?? '').trim();
+  return presenter.toLowerCase() === name.toLowerCase() ? '' : presenter;
+}
 
 // AzuraCast's /schedule returns upcoming entries across several days. The card
 // only has room for today, so filter to entries whose start timestamp falls on
@@ -138,7 +158,7 @@ export function parseSchedule(raw: unknown, now = new Date(), limit = 3): Schedu
     }
     out.push({
       name,
-      presenter: (item?.streamer ?? '').trim(),
+      presenter: schedulePresenter(item, name),
       start: fmtScheduleTime(ts),
       isNow: item?.is_now === true
     });

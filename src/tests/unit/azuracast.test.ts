@@ -130,3 +130,35 @@ describe('track helpers', () => {
     expect(fmtDuration(65)).toBe('1:05');
   });
 });
+
+describe('parseSchedule presenter extraction', () => {
+  const at = (h: number) => {
+    const d = new Date();
+    return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate(), h).getTime() / 1000);
+  };
+
+  // AzuraCast exposes no `streamer` field on schedule entries — the presenter is
+  // encoded in `description` as "Streamer: <name>". Reading only `streamer`
+  // meant the DJ never rendered against a real install.
+  it('reads the presenter out of AzuraCast’s description field', () => {
+    const [entry] = parseSchedule([{ name: 'Sunday Sessions', description: 'Streamer: DJ Ricky Prime', start_timestamp: at(12) }]);
+    expect(entry?.presenter).toBe('DJ Ricky Prime');
+  });
+
+  // AzuraCast names streamer entries after the streamer, so the description just
+  // repeats it — rendering both gives "DJ WolfDen · DJ WolfDen".
+  it('drops a presenter that merely repeats the entry name', () => {
+    const [entry] = parseSchedule([{ name: 'DJ WolfDen', description: 'Streamer: DJ WolfDen', start_timestamp: at(10) }]);
+    expect(entry?.presenter).toBe('');
+  });
+
+  it('still honours an explicit streamer field when a feed provides one', () => {
+    const [entry] = parseSchedule([{ name: 'Kitchen Table', streamer: 'Gregory', start_timestamp: at(20) }]);
+    expect(entry?.presenter).toBe('Gregory');
+  });
+
+  it('ignores a description that is not in the Streamer: form', () => {
+    const [entry] = parseSchedule([{ name: 'Overnight', description: 'Automated playlist', start_timestamp: at(3) }]);
+    expect(entry?.presenter).toBe('');
+  });
+});

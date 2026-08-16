@@ -87,12 +87,54 @@ Every option is a `data-*` attribute on the container, or a key on the config ob
 | `data-link-label`    | `Full player and schedule →` | Label for that link.                                                    |
 | `data-show-dial`     | `true`                     | FM dial on the card. Requires `data-frequency`.                           |
 | `data-show-schedule` | `true`                     | Today's schedule strip. Hides itself if the station publishes none.       |
+| `data-schedule-url`  | station's AzuraCast        | Fetch the schedule from here instead. Must return AzuraCast's schedule JSON and send CORS headers. |
 | `data-show-listeners`| `false`                    | Live listener count. Off by default; hides itself anyway if unpublished.  |
 | `data-show-volume`   | `true`                     | Volume slider. Always hidden on iOS.                                      |
 | `data-poll-interval` | `20`                       | Metadata poll seconds. Floor of 10.                                       |
 | `data-fonts`         | `auto`                     | `auto` self-hosts the web fonts; `none` uses system fonts, zero requests. |
 
 Unknown or malformed values log a warning and fall back to the default rather than failing to render. `station`, `stream`, and `link` accept only `http(s)` URLs — a `javascript:` URL in host-page markup is rejected.
+
+## Schedule from somewhere other than AzuraCast
+
+The card's schedule strip reads AzuraCast's `/api/station/{shortcode}/schedule`.
+Plenty of stations don't keep their schedule there — WVVY's lives in a Google
+Sheet the station manager edits.
+
+Rather than teach the widget about each station's storage, point it at any URL
+that returns the **same JSON shape**:
+
+```html
+<div id="wvvy-player"
+  data-variant="card"
+  data-schedule-url="https://wvvy.org/api/schedule"></div>
+```
+
+Each entry needs `name` (or `title`) and `start_timestamp`; `description` in
+AzuraCast's `"Streamer: <name>"` form supplies the presenter, and `is_now` marks
+the current show:
+
+```json
+[
+  {
+    "id": 58,
+    "type": "streamer",
+    "name": "Sunday Sessions",
+    "title": "Sunday Sessions",
+    "description": "Streamer: Ricky Prime",
+    "start_timestamp": 1786892400,
+    "start": "2026-08-16T12:00:00-04:00",
+    "end_timestamp": 1786899600,
+    "end": "2026-08-16T14:00:00-04:00",
+    "is_now": false
+  }
+]
+```
+
+The endpoint must send `Access-Control-Allow-Origin` for the sites the widget
+runs on. WVVY's implementation — a Cloudflare Pages Function projecting a Google
+Sheet's recurring weekly rows onto dated occurrences — is in the
+[wvvy.org repo](https://github.com/wvvy967/wvvy.org) at `functions/api/schedule.ts`.
 
 ## Theming
 

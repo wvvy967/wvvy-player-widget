@@ -19,7 +19,8 @@
         station: config.station,
         shortcode: config.shortcode,
         pollIntervalMs: config.pollInterval * 1000,
-        withSchedule: config.showSchedule && config.variant === 'card'
+        withSchedule: config.showSchedule && config.variant === 'card',
+        scheduleUrl: config.scheduleUrl
       })
   );
 

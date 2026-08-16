@@ -45,6 +45,16 @@ export interface PlayerWidgetConfig {
   showDial?: boolean;
   /** Show today's schedule strip on the card. Default true; hides itself when the station has no schedule. */
   showSchedule?: boolean;
+  /**
+   * Where to fetch the schedule from. Defaults to the station's own AzuraCast
+   * `/api/station/{shortcode}/schedule`.
+   *
+   * Point this at any URL returning that same JSON shape when the schedule lives
+   * outside AzuraCast — WVVY's is a Google Sheet projected into the AzuraCast
+   * format by `https://wvvy.org/api/schedule`. The endpoint must send
+   * `Access-Control-Allow-Origin` for the host sites the widget runs on.
+   */
+  scheduleUrl?: string;
   /** Show the live listener count. Default false — opt in per embed. Hides itself anyway when the station doesn't publish one. */
   showListeners?: boolean;
   /** Show the volume slider. Default true (always hidden on iOS, which reserves volume for hardware buttons). */

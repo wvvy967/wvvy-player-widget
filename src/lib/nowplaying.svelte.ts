@@ -7,6 +7,12 @@ export type FeedOptions = {
   shortcode: string;
   pollIntervalMs: number;
   withSchedule: boolean;
+  /**
+   * Explicit schedule endpoint. Falls back to the station's own AzuraCast
+   * schedule when unset — the override exists for stations whose schedule lives
+   * elsewhere but is published in the same JSON shape.
+   */
+  scheduleUrl?: string;
 };
 
 /**
@@ -76,12 +82,15 @@ export class NowPlayingStore {
 
   private async loadSchedule(): Promise<void> {
     try {
-      const res = await fetch(scheduleUrl(this.opts.station, this.opts.shortcode), { cache: 'no-store' });
+      const url = this.opts.scheduleUrl ?? scheduleUrl(this.opts.station, this.opts.shortcode);
+      const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) throw new Error(`status ${res.status}`);
       this.schedule = parseSchedule(await res.json());
     } catch {
-      // Stations that don't run their schedule through AzuraCast (WVVY keeps
-      // theirs in a Google Sheet) just get an empty strip, which the card hides.
+      // Stations that don't run their schedule through AzuraCast just get an
+      // empty strip, which the card hides. WVVY keeps theirs in a Google Sheet
+      // and points `scheduleUrl` at an endpoint that republishes it in this
+      // same shape, so it takes the normal path above.
       this.schedule = [];
     }
   }

@@ -112,7 +112,7 @@ function text(value: unknown): string | undefined {
 export type ResolvedConfig = Required<
   Pick<PlayerWidgetConfig, 'station' | 'shortcode' | 'variant' | 'theme' | 'linkLabel' | 'showDial' | 'showSchedule' | 'showListeners' | 'showVolume' | 'pollInterval' | 'fonts'>
 > &
-  Pick<PlayerWidgetConfig, 'accent' | 'stream' | 'name' | 'tagline' | 'description' | 'frequency' | 'location' | 'link' | 'assetBase'>;
+  Pick<PlayerWidgetConfig, 'accent' | 'stream' | 'name' | 'tagline' | 'description' | 'frequency' | 'location' | 'link' | 'assetBase' | 'scheduleUrl'>;
 
 /** Normalise raw config (from `data-*` attributes or a JS object) into resolved, validated values. */
 export function resolveConfig(input: PlayerWidgetConfig = {}): ResolvedConfig {
@@ -129,6 +129,7 @@ export function resolveConfig(input: PlayerWidgetConfig = {}): ResolvedConfig {
     frequency: text(input.frequency),
     location: text(input.location),
     link: validUrl('link', input.link),
+    scheduleUrl: validUrl('scheduleUrl', input.scheduleUrl),
     linkLabel: text(input.linkLabel) ?? CONFIG_DEFAULTS.linkLabel,
     showDial: validBoolean('showDial', input.showDial, CONFIG_DEFAULTS.showDial),
     showSchedule: validBoolean('showSchedule', input.showSchedule, CONFIG_DEFAULTS.showSchedule),
