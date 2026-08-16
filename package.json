@@ -7,7 +7,7 @@
   "keywords": ["azuracast", "radio", "player", "widget", "embed", "icecast", "svelte"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pjaudiomv/wvvy-player-widget.git"
+    "url": "git+https://github.com/wvvy967/wvvy-player-widget.git"
   },
   "homepage": "https://wvvy.org/widget/",
   "files": ["dist/module.js", "dist/module.d.ts"],
