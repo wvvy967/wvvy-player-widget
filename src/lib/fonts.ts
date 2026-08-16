@@ -28,10 +28,14 @@ const FACES: FaceSpec[] = [
 ];
 
 /**
- * Where the widget's own assets live. Derived from the executing script's URL so
- * the bundle works from any CDN path without configuration, with an explicit
- * `assetBase` override for bundler consumers where the script URL is the host
- * app's, not ours.
+ * Where the widget's own assets live — derived from the executing script's URL,
+ * so the drop-in bundle works from any CDN path without configuration.
+ *
+ * Deliberately no `import.meta.url` fallback here. This module is shared by both
+ * entry points, and `import.meta` is invalid syntax in the IIFE bundle — rolldown
+ * replaces it with `{}` and warns. Resolving a module URL is the *entry point's*
+ * job, since only it knows its own output format: `main.ts` relies on
+ * `document.currentScript`, `module.ts` passes an `import.meta.url`-derived base.
  */
 export function resolveAssetBase(explicit?: string): string | null {
   if (explicit) return explicit.replace(/\/+$/, '');
@@ -39,12 +43,7 @@ export function resolveAssetBase(explicit?: string): string | null {
     const current = document.currentScript as HTMLScriptElement | null;
     if (current?.src) return current.src.replace(/\/[^/]*$/, '');
   }
-  try {
-    // ESM builds: resolve relative to this module.
-    return new URL(/* @vite-ignore */ '.', import.meta.url).href.replace(/\/+$/, '');
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 export function injectFonts(assetBase: string | null): void {

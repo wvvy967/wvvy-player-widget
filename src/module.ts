@@ -39,6 +39,25 @@ import type { PlayerWidgetConfig, Variant, Theme, FontMode, WidgetHandle } from 
 export type { PlayerWidgetConfig, Variant, Theme, FontMode, WidgetHandle };
 
 /**
+ * Default location for the widget's own assets (the self-hosted fonts), resolved
+ * relative to this module. Only correct when the ESM build is served as-is —
+ * once a bundler inlines it, this points at the host app's output directory, so
+ * bundler consumers should pass an explicit `assetBase` or `fonts: 'none'`.
+ *
+ * `import.meta` lives here rather than in the shared fonts module because it is
+ * invalid syntax in the IIFE bundle, which resolves its base from the script tag.
+ */
+const moduleAssetBase: string | undefined = (() => {
+  try {
+    // Resolving at runtime is the point — Vite must not try to rewrite this to a
+    // build-time asset path.
+    return new URL(/* @vite-ignore */ '.', import.meta.url).href.replace(/\/+$/, '');
+  } catch {
+    return undefined;
+  }
+})();
+
+/**
  * Mount the player widget into the given element.
  *
  * The element is used only as a shadow host — its existing children are left
@@ -50,5 +69,5 @@ export type { PlayerWidgetConfig, Variant, Theme, FontMode, WidgetHandle };
  * @returns A handle whose `destroy()` stops polling, releases the audio element, and clears the shadow root.
  */
 export function mountPlayerWidget(el: HTMLElement, options: PlayerWidgetConfig = {}): WidgetHandle {
-  return mountPlayer(el, options);
+  return mountPlayer(el, { assetBase: moduleAssetBase, ...options });
 }
