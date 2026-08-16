@@ -306,7 +306,7 @@ const widget = mountPlayerWidget(document.getElementById('player'), {
           <tr><td>data-link-label</td><td>Full player and schedule →</td><td>Label for that link.</td></tr>
           <tr><td>data-show-dial</td><td>true</td><td>FM dial on the card. Needs <code>data-frequency</code>.</td></tr>
           <tr><td>data-show-schedule</td><td>true</td><td>Today's schedule strip. Hides itself if the station publishes none.</td></tr>
-          <tr><td>data-show-listeners</td><td>true</td><td>Live listener count. Hides itself if the station doesn't publish one.</td></tr>
+          <tr><td>data-show-listeners</td><td>false</td><td>Live listener count. Off by default; hides itself anyway if the station doesn't publish one.</td></tr>
           <tr><td>data-show-volume</td><td>true</td><td>Volume slider. Always hidden on iOS.</td></tr>
           <tr><td>data-poll-interval</td><td>20</td><td>Metadata poll seconds. Floor of 10.</td></tr>
           <tr><td>data-fonts</td><td>auto</td><td><code>auto</code> self-hosts the web fonts; <code>none</code> uses system fonts and makes zero extra requests.</td></tr>
@@ -358,7 +358,9 @@ const widget = mountPlayerWidget(document.getElementById('player'), {
           frequency: $('c-freq').value.trim(),
           link: 'https://wvvy.org',
           name: 'WVVY-LP',
-          location: "Tisbury · Martha's Vineyard · 100W"
+          location: "Tisbury · Martha's Vineyard · 100W",
+          tagline: "Martha's Vineyard Community Radio",
+          description: 'No format. No playlist. Volunteer island DJs since 2007.'
         };
       }
 

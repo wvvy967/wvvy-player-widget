@@ -11,10 +11,10 @@
  * the same stream.
  */
 
-import { mountPlayer, type WidgetHandle } from './lib/mount';
+import { mountPlayer } from './lib/mount';
 import { configFromDataset } from './lib/config';
 import { resolveAssetBase } from './lib/fonts';
-import type { PlayerWidgetConfig } from './types';
+import type { PlayerWidgetConfig, WidgetHandle } from './types';
 
 declare const __APP_VERSION__: string;
 

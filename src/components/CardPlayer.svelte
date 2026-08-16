@@ -31,6 +31,12 @@
 
   let nowLabel = $derived(liveDj ? 'On now' : feed.feedState === 'stale' ? 'Last known' : 'Now playing');
   let nowText = $derived(liveDj ? `Live · ${liveDj}` : track);
+
+  // AzuraCast reports an art URL per track and some of them 404 (missing tags,
+  // pruned media). Tracking the URL that failed rather than a bare flag means the
+  // next track gets a fresh attempt instead of inheriting the previous failure.
+  let failedArt = $state<string | null>(null);
+  let showArt = $derived(!!art && art !== failedArt);
 </script>
 
 <div class="surface bg-ink scanlines relative overflow-hidden p-4 @[440px]:p-6">
@@ -87,8 +93,15 @@
   <!-- Now playing -->
   {#if nowText || feed.feedState === 'loading'}
     <div class="surface bg-panel mt-5 flex items-center gap-3 p-3 @[440px]:gap-4 @[440px]:p-4">
-      {#if art}
-        <img src={art} alt="" loading="lazy" class="bg-raised h-12 w-12 shrink-0 object-cover @[440px]:h-14 @[440px]:w-14" style="border-radius:calc(var(--wvvy-radius) / 2);" />
+      {#if showArt}
+        <img
+          src={art}
+          alt=""
+          loading="lazy"
+          onerror={() => (failedArt = art ?? null)}
+          class="bg-raised h-12 w-12 shrink-0 object-cover @[440px]:h-14 @[440px]:w-14"
+          style="border-radius:calc(var(--wvvy-radius) / 2);"
+        />
       {:else}
         <div class="bg-raised text-accent grid h-12 w-12 shrink-0 place-items-center text-lg @[440px]:h-14 @[440px]:w-14" style="border-radius:calc(var(--wvvy-radius) / 2);" aria-hidden="true">♪</div>
       {/if}

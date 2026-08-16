@@ -45,7 +45,7 @@ export interface PlayerWidgetConfig {
   showDial?: boolean;
   /** Show today's schedule strip on the card. Default true; hides itself when the station has no schedule. */
   showSchedule?: boolean;
-  /** Show the live listener count. Default true; hides itself when the station doesn't publish one. */
+  /** Show the live listener count. Default false — opt in per embed. Hides itself anyway when the station doesn't publish one. */
   showListeners?: boolean;
   /** Show the volume slider. Default true (always hidden on iOS, which reserves volume for hardware buttons). */
   showVolume?: boolean;
@@ -63,3 +63,9 @@ export interface PlayerWidgetConfig {
 export type Variant = 'bar' | 'card';
 export type Theme = 'brutalist' | 'modern';
 export type FontMode = 'auto' | 'none';
+
+/** Returned by `mountPlayerWidget`. Keep a reference to tear the widget down. */
+export interface WidgetHandle {
+  /** Remove the widget, stop polling, and release the audio element. */
+  destroy(): void;
+}

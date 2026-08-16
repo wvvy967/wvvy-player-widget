@@ -60,7 +60,7 @@ describe('mountPlayer', () => {
 
   it('renders the card variant with now-playing metadata from the API', async () => {
     const el = host();
-    const w = mountPlayer(el, { variant: 'card', frequency: '96.7', fonts: 'none' });
+    const w = mountPlayer(el, { variant: 'card', frequency: '96.7', fonts: 'none', showListeners: true });
     await settle();
     await settle();
 

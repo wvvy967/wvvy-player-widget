@@ -33,8 +33,8 @@
  * @packageDocumentation
  */
 
-import { mountPlayer, type WidgetHandle } from './lib/mount';
-import type { PlayerWidgetConfig, Variant, Theme, FontMode } from './types';
+import { mountPlayer } from './lib/mount';
+import type { PlayerWidgetConfig, Variant, Theme, FontMode, WidgetHandle } from './types';
 
 export type { PlayerWidgetConfig, Variant, Theme, FontMode, WidgetHandle };
 

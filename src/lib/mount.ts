@@ -6,19 +6,43 @@ import App from '../App.svelte';
 import css from '../app.css?inline';
 import { resolveConfig } from './config';
 import { injectFonts, resolveAssetBase } from './fonts';
-import type { PlayerWidgetConfig } from '@/types';
+import type { PlayerWidgetConfig, WidgetHandle } from '@/types';
 
 /** Reuse one parsed stylesheet across every widget on the page. */
 let sheet: CSSStyleSheet | null = null;
+let patchedCss: string | null = null;
+
+/**
+ * `@property` registrations are document-scoped — a rule inside a shadow root's
+ * stylesheet is ignored entirely. Tailwind v4 leans on registered `--tw-*`
+ * defaults for a lot of utilities, so without this, `border-2` computes to
+ * `border-style: none` (zero width), `-translate-x-1/2` does nothing, and
+ * shadows and gradients quietly vanish.
+ *
+ * Re-declaring each registration's `initial-value` on `:host` restores the
+ * defaults by ordinary inheritance, and keeps everything inside the shadow root
+ * rather than injecting `@property` rules into the host document.
+ */
+export function withPropertyDefaults(source: string): string {
+  const decls: string[] = [];
+  for (const match of source.matchAll(/@property\s+(--[\w-]+)\s*\{([^}]*)\}/g)) {
+    const name = match[1];
+    const initial = match[2]?.match(/initial-value:\s*([^;]+)/);
+    // Registrations without an initial-value have nothing to restore.
+    if (name && initial?.[1]) decls.push(`${name}:${initial[1].trim()}`);
+  }
+  return decls.length > 0 ? `:host{${decls.join(';')}}\n${source}` : source;
+}
 
 function attachStyles(root: ShadowRoot): void {
+  patchedCss ??= withPropertyDefaults(css);
   // Constructable stylesheets let N widgets share one parsed copy. Supported
   // everywhere shadow DOM matters; the <style> path covers the stragglers.
   if ('adoptedStyleSheets' in Document.prototype && typeof CSSStyleSheet !== 'undefined') {
     try {
       if (!sheet) {
         sheet = new CSSStyleSheet();
-        sheet.replaceSync(css);
+        sheet.replaceSync(patchedCss);
       }
       root.adoptedStyleSheets = [sheet];
       return;
@@ -27,14 +51,9 @@ function attachStyles(root: ShadowRoot): void {
     }
   }
   const style = document.createElement('style');
-  style.textContent = css;
+  style.textContent = patchedCss;
   root.appendChild(style);
 }
-
-export type WidgetHandle = {
-  /** Remove the widget, stop polling, and release the audio element. */
-  destroy(): void;
-};
 
 /**
  * Mount the player into `el`. The element's contents are left alone — everything

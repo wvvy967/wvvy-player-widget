@@ -118,6 +118,14 @@
   letter-spacing: -0.01em;
   line-height: 1.15;
 }
+/* Single-line display text that truncates. The tight display leading is right
+   for stacked headings but clips ascenders and descenders once `truncate` adds
+   `overflow: hidden` — the line box ends up shorter than the glyphs. */
+.t-display.truncate {
+  line-height: 1.3;
+  padding-block: 1px;
+}
+
 .t-label {
   font-family: var(--font-label);
   text-transform: uppercase;

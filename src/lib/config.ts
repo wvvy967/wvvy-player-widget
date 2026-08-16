@@ -12,7 +12,9 @@ export const CONFIG_DEFAULTS = {
   linkLabel: 'Full player and schedule →',
   showDial: true,
   showSchedule: true,
-  showListeners: true,
+  // Off by default: a low listener count on a community station reads as
+  // "nobody's here" to a first-time visitor, so it's opt-in per embed.
+  showListeners: false,
   showVolume: true,
   pollInterval: 20,
   fonts: 'auto' as FontMode

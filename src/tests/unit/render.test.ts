@@ -93,7 +93,7 @@ describe('bar variant', () => {
 describe('card variant', () => {
   it('renders header, dial, description, and listener count', async () => {
     stubStation({ nowplaying: LIVE_TRACK });
-    const { text, root, w } = await render({ variant: 'card', name: 'WVVY-LP', frequency: '96.7', location: "Tisbury · Martha's Vineyard · 100W" });
+    const { text, root, w } = await render({ variant: 'card', name: 'WVVY-LP', frequency: '96.7', location: "Tisbury · Martha's Vineyard · 100W", showListeners: true });
     expect(text()).toContain('WVVY-LP');
     expect(text()).toContain("Tisbury · Martha's Vineyard · 100W");
     expect(text()).toContain('No format. No playlist.');
@@ -113,14 +113,15 @@ describe('card variant', () => {
 
   it('hides the listener count when the station does not publish one', async () => {
     stubStation({ nowplaying: { ...LIVE_TRACK, listeners: undefined } });
-    const { text, w } = await render({ variant: 'card' });
+    const { text, w } = await render({ variant: 'card', showListeners: true });
     expect(text()).not.toContain('listening');
     w.destroy();
   });
 
-  it('respects showListeners=false even when a count is available', async () => {
+  // Off by default: a low count on a community station reads as "nobody's here".
+  it('hides the listener count unless the embed opts in', async () => {
     stubStation({ nowplaying: LIVE_TRACK });
-    const { text, w } = await render({ variant: 'card', showListeners: false });
+    const { text, w } = await render({ variant: 'card' });
     expect(text()).not.toContain('7 listening');
     w.destroy();
   });
@@ -191,6 +192,25 @@ describe('theming', () => {
     const { root, w } = await render({ variant: 'bar', accent: 'red;background:url(evil)' });
     const wrapper = root().querySelector('.theme-brutalist') as HTMLElement;
     expect(wrapper.getAttribute('style')).toBeNull();
+    w.destroy();
+  });
+});
+
+describe('album art', () => {
+  // AzuraCast hands back an art URL per track and some of them 404 (missing
+  // tags, pruned media). A broken-image icon in the middle of the card looks
+  // like the widget itself is broken.
+  it('falls back to the placeholder when the art fails to load', async () => {
+    stubStation({ nowplaying: { ...LIVE_TRACK, now_playing: { song: { artist: 'A', title: 'B', art: 'https://radio.test/missing.jpg' } } } });
+    const { root, w } = await render({ variant: 'card' });
+
+    const img = root().querySelector('img')!;
+    expect(img).not.toBeNull();
+    img.dispatchEvent(new Event('error'));
+    await settle();
+
+    expect(root().querySelector('img')).toBeNull();
+    expect(root().textContent).toContain('♪');
     w.destroy();
   });
 });
