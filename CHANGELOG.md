@@ -7,6 +7,16 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-16
+
+### Changed
+
+- Narrowed the published npm package to what bundler consumers actually need: `dist/module.js`, its type declarations, and `dist/fonts/`. The demo page (`dist/index.html`), the drop-in CDN bundle (`dist/player.js`), and the iframe fallback (`dist/embed.html`) are no longer shipped to npm — those are served from [wvvy.org/widget/](https://wvvy.org/widget/). Packed 200.4 → 166.4 kB, unpacked 361.8 → 256.7 kB, 15 → 12 files.
+
+  `dist/fonts/` deliberately stays: consumers who point `assetBase` at their own copy need the woff2 files (and the OFL notice alongside them). `dist/types/` stays because `module.d.ts` imports `./types` — dropping it would ship declarations that fail to resolve.
+
+  No runtime change. Anyone loading `player.js` from the CDN is unaffected.
+
 ## [0.1.0] - 2026-08-16
 
 First release. Published to npm as [`wvvy-player-widget`](https://www.npmjs.com/package/wvvy-player-widget)
@@ -38,5 +48,6 @@ and could easily regress:
 - Album art that 404s (AzuraCast reports art URLs for tracks whose media is missing) now falls back to the placeholder instead of rendering a broken-image icon.
 - Truncated display text was clipped by the brutalist theme's `line-height: 0.85`.
 
-[unreleased]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/wvvy967/wvvy-player-widget/releases/tag/v0.1.0

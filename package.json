@@ -1,6 +1,6 @@
 {
   "name": "wvvy-player-widget",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "license": "MIT",
   "description": "Embeddable live-radio player widget for any AzuraCast station. Single self-contained script, Shadow DOM isolated.",
@@ -19,7 +19,10 @@
   },
   "homepage": "https://wvvy.org/widget/",
   "files": [
-    "dist"
+    "dist/module.js",
+    "dist/module.d.ts",
+    "dist/types",
+    "dist/fonts"
   ],
   "module": "./dist/module.js",
   "types": "./dist/module.d.ts",
