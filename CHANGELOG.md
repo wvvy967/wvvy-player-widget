@@ -7,17 +7,36 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-16
+
+First release. Published to npm as [`wvvy-player-widget`](https://www.npmjs.com/package/wvvy-player-widget)
+and served from [wvvy.org/widget/](https://wvvy.org/widget/).
+
 ### Added
 
-- Initial release. Embeddable live-radio player for any AzuraCast station.
-- Two variants: `bar` (single strip) and `card` (dial, transport, now playing, schedule).
+- Embeddable live-radio player for any AzuraCast station — `data-station` / `data-shortcode` point it at any install, with WVVY 96.7 LPFM as the default.
+- Two variants: `bar` (single strip) and `card` (dial, transport, now playing, today's schedule).
 - Two themes: `brutalist` (wvvy.org house style) and `modern` (navy/amber card), each with an `accent` override and `--wvvy-*` custom properties for host theming.
-- Shadow DOM isolation — host page CSS cannot reach the widget, and the widget's CSS cannot leak out.
-- OS media-session integration: lock screen, notification shade, and CarPlay transport with live track metadata.
-- Drop-in IIFE bundle (`dist/player.js`) configured through `data-*` attributes, plus an ESM entry (`dist/module.js`) exporting `mountPlayerWidget` for npm consumers.
-- Iframe fallback page (`dist/embed.html`) for site builders that strip `<script>`, with a `wvvy-player:height` postMessage for self-sizing hosts.
-- Self-hosted woff2 font subsets — no third-party requests from a host site's page. `fonts: 'none'` opts out entirely.
+- Shadow DOM isolation — host page CSS cannot reach the widget, and the widget's CSS cannot leak out. Theming crosses that boundary only through the documented custom properties.
+- OS media-session integration: lock screen, notification shade, and CarPlay transport with live track metadata. This is why the widget runs in the host page rather than an iframe — browsers bind media controls to the top-level document.
+- Drop-in IIFE bundle (`dist/player.js`) configured through `data-*` attributes, plus an ESM entry (`dist/module.js`) exporting `mountPlayerWidget` with rolled-up types.
+- Iframe fallback page (`dist/embed.html`) for site builders that strip `<script>`, taking the same options as query parameters and posting a `wvvy-player:height` message for self-sizing hosts.
+- Self-hosted woff2 font subsets (OFL 1.1) — the widget never calls Google Fonts from a visitor's browser. `fonts: 'none'` opts out entirely.
 - Multiple widgets per page, with mutual exclusion so only one stream is ever audible.
 - Polling that pauses on tab hide and when scrolled out of view, with a 10s interval floor and no request stacking.
 - Reconnect with exponential backoff, giving up after ~35s with an "off air" explanation rather than spinning indefinitely.
 - Container-query layout, so the widget responds to its container rather than the viewport.
+- Config validation: unknown enum values warn and fall back rather than failing to render; `station`/`stream`/`link` accept only `http(s)` URLs, and `accent` rejects the punctuation needed to break out of a style attribute.
+
+### Fixed
+
+Caught during initial development, recorded because each failure mode is silent
+and could easily regress:
+
+- Tailwind's `@property` registrations are document-scoped and are ignored inside a shadow root, which made `border-2` compute to `border-style: none` and `-translate-x-1/2` stop translating. Their `initial-value`s are now hoisted onto `:host`.
+- `DOMException` is not reliably `instanceof Error` across engines, so a browser autoplay block was misclassified and sent into the reconnect backoff instead of being treated as terminal.
+- Album art that 404s (AzuraCast reports art URLs for tracks whose media is missing) now falls back to the placeholder instead of rendering a broken-image icon.
+- Truncated display text was clipped by the brutalist theme's `line-height: 0.85`.
+
+[unreleased]: https://github.com/wvvy967/wvvy-player-widget/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/wvvy967/wvvy-player-widget/releases/tag/v0.1.0

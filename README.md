@@ -6,6 +6,12 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/wvvy-player-widget"><img src="https://img.shields.io/npm/v/wvvy-player-widget" alt="npm"></a>
+  <a href="https://github.com/wvvy967/wvvy-player-widget/actions/workflows/main.yml"><img src="https://github.com/wvvy967/wvvy-player-widget/actions/workflows/main.yml/badge.svg" alt="main"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/npm/l/wvvy-player-widget" alt="MIT"></a>
+</p>
+
+<p align="center">
   <strong>👉 Live demo and snippet builder:</strong> <a href="https://wvvy.org/widget/">wvvy.org/widget</a>
 </p>
 
