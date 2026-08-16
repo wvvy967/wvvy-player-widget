@@ -27,10 +27,12 @@ export interface PlayerWidgetConfig {
    * mount as reported by the now-playing API.
    */
   stream?: string;
-  /** Station display name. Defaults to the name AzuraCast reports. */
+  /** Station display name — the card's header and the bar's status strip. Defaults to the name AzuraCast reports. */
   name?: string;
-  /** Sub-line under the name on the card. Defaults to the AzuraCast description. */
+  /** Headline beside the card's play button, e.g. `Martha's Vineyard Community Radio`. Defaults to the AzuraCast station name. */
   tagline?: string;
+  /** Small line under that headline. Defaults to the AzuraCast station description. */
+  description?: string;
   /** Broadcast frequency, e.g. `96.7`. Shown on the dial and in the bar's status line. */
   frequency?: string;
   /** Location line on the card, e.g. `Tisbury · Martha's Vineyard · 100W`. */

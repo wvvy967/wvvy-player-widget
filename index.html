@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WVVY Player Widget — embeddable AzuraCast radio player</title>
+    <meta name="description" content="Drop a live radio player on any website with one script tag. Works with any AzuraCast station. Shadow DOM isolated, no dependencies." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📻</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=Special+Elite&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --ink: #0a0908;
+        --panel: #141210;
+        --line: #2e2a26;
+        --bone: #ece5d8;
+        --muted: #8b867c;
+        --signal: #c4ff3d;
+        --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+        --elite: 'Special Elite', 'Courier New', monospace;
+        --stencil: 'Big Shoulders Stencil', Impact, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ink);
+        color: var(--bone);
+        font-family: var(--mono);
+        font-size: 15px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 20px 96px;
+      }
+      header {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 40px;
+        padding: 48px 0 28px;
+      }
+      h1 {
+        font-family: var(--stencil);
+        font-weight: 900;
+        font-size: clamp(40px, 9vw, 84px);
+        line-height: 0.85;
+        margin: 0 0 12px;
+        letter-spacing: 0.01em;
+      }
+      h2 {
+        font-family: var(--stencil);
+        font-weight: 900;
+        font-size: 30px;
+        line-height: 1;
+        margin: 56px 0 16px;
+        letter-spacing: 0.02em;
+      }
+      h3 {
+        font-family: var(--elite);
+        font-size: 12px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 32px 0 10px;
+      }
+      .lede {
+        font-family: var(--elite);
+        color: var(--muted);
+        font-size: 14px;
+        letter-spacing: 0.06em;
+        max-width: 62ch;
+      }
+      a {
+        color: var(--signal);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 1px 5px;
+        color: var(--bone);
+      }
+      pre {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 16px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+      }
+      pre code {
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--elite);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 10px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      td:first-child {
+        white-space: nowrap;
+        color: var(--signal);
+      }
+      /* Builder */
+      .stage {
+        background: repeating-conic-gradient(#17151300 0% 25%, #ffffff08 0% 50%) 50% / 18px 18px;
+        border: 1px solid var(--line);
+        padding: 28px;
+        margin-bottom: 16px;
+      }
+      .stage[data-bg='light'] {
+        background: #f4f2ee;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-family: var(--elite);
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+      select,
+      input[type='text'],
+      input[type='color'] {
+        width: 100%;
+        background: var(--panel);
+        color: var(--bone);
+        border: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 13px;
+        padding: 7px 9px;
+      }
+      input[type='color'] {
+        height: 34px;
+        padding: 3px;
+      }
+      .snippet {
+        position: relative;
+      }
+      .copy {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--signal);
+        color: var(--ink);
+        border: 0;
+        font-family: var(--elite);
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+      .copy:hover {
+        background: var(--bone);
+      }
+      .note {
+        border-left: 2px solid var(--signal);
+        padding: 2px 0 2px 14px;
+        color: var(--muted);
+        font-size: 13.5px;
+        margin: 16px 0;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 72px;
+        padding-top: 24px;
+        color: var(--muted);
+        font-size: 12px;
+        font-family: var(--elite);
+        letter-spacing: 0.12em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>PLAYER<br />WIDGET</h1>
+        <p class="lede">A live radio player for any website. One script tag, no dependencies, no iframe. Works with any AzuraCast station — WVVY 96.7 is just the default.</p>
+      </header>
+
+      <h2>TRY IT</h2>
+      <div class="controls">
+        <div>
+          <label for="c-variant">Variant</label>
+          <select id="c-variant">
+            <option value="bar">bar</option>
+            <option value="card">card</option>
+          </select>
+        </div>
+        <div>
+          <label for="c-theme">Theme</label>
+          <select id="c-theme">
+            <option value="brutalist">brutalist</option>
+            <option value="modern">modern</option>
+          </select>
+        </div>
+        <div>
+          <label for="c-accent">Accent</label>
+          <input type="color" id="c-accent" value="#c4ff3d" />
+        </div>
+        <div>
+          <label for="c-freq">Frequency</label>
+          <input type="text" id="c-freq" value="96.7" />
+        </div>
+        <div>
+          <label for="c-bg">Host page</label>
+          <select id="c-bg">
+            <option value="dark">dark host page</option>
+            <option value="light">light host page</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stage" id="stage" data-bg="dark">
+        <!-- This is a real snippet, auto-mounted by the bundle on load. The
+             builder below tears it down and re-mounts as you change options. -->
+        <div id="preview">
+          <div id="wvvy-player" data-variant="bar" data-frequency="96.7" data-name="WVVY-LP" data-link="https://wvvy.org"></div>
+        </div>
+      </div>
+
+      <div class="snippet">
+        <button class="copy" id="copy" type="button">Copy</button>
+        <pre><code id="snippet"></code></pre>
+      </div>
+
+      <h2>INSTALL</h2>
+      <h3>Any HTML page</h3>
+      <pre><code>&lt;div id="wvvy-player" data-variant="bar"&gt;&lt;/div&gt;
+&lt;script src="https://wvvy.org/widget/player.js" async&gt;&lt;/script&gt;</code></pre>
+
+      <div class="note">
+        Squarespace, Wix, and Google Sites strip <code>&lt;script&gt;</code> on some plans. If yours does, use the iframe fallback:
+        <br /><code>&lt;iframe src="https://wvvy.org/widget/embed.html?variant=bar" width="100%" height="104" style="border:0" title="WVVY 96.7 live"&gt;&lt;/iframe&gt;</code>
+        <br />It loads the same bundle. The one thing you give up is lock-screen and CarPlay controls, which browsers only bind to the top-level page.
+      </div>
+
+      <h3>npm</h3>
+      <pre><code>npm install wvvy-player-widget</code></pre>
+      <pre><code>import { mountPlayerWidget } from 'wvvy-player-widget';
+
+const widget = mountPlayerWidget(document.getElementById('player'), {
+  station: 'https://radio.wvvy.org',
+  shortcode: 'wvvy',
+  variant: 'card',
+  frequency: '96.7'
+});
+
+// widget.destroy() on teardown</code></pre>
+
+      <h2>OPTIONS</h2>
+      <p class="lede">Every option is a <code>data-*</code> attribute on the container, or a key on the config object. Only <code>station</code> and <code>shortcode</code> point the widget at a stream; everything else is presentation.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Default</th>
+            <th>What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>data-station</td><td>https://radio.wvvy.org</td><td>Base URL of the AzuraCast install.</td></tr>
+          <tr><td>data-shortcode</td><td>wvvy</td><td>Station shortcode within that install.</td></tr>
+          <tr><td>data-variant</td><td>bar</td><td><code>bar</code> (single strip) or <code>card</code> (full console).</td></tr>
+          <tr><td>data-theme</td><td>brutalist</td><td><code>brutalist</code> or <code>modern</code>.</td></tr>
+          <tr><td>data-accent</td><td>theme default</td><td>Any CSS colour. Drives the play button, dot, EQ, and dial.</td></tr>
+          <tr><td>data-stream</td><td>from API</td><td>Explicit stream URL. Defaults to the station's own default mount.</td></tr>
+          <tr><td>data-name</td><td>from API</td><td>Station name in the card header and bar strip.</td></tr>
+          <tr><td>data-tagline</td><td>from API</td><td>Headline beside the card's play button.</td></tr>
+          <tr><td>data-description</td><td>from API</td><td>Small line under that headline.</td></tr>
+          <tr><td>data-location</td><td>—</td><td>Location line under the card header.</td></tr>
+          <tr><td>data-frequency</td><td>—</td><td>e.g. <code>96.7</code>. Also places the dial needle.</td></tr>
+          <tr><td>data-link</td><td>—</td><td>Outbound link URL. Omit to hide the button.</td></tr>
+          <tr><td>data-link-label</td><td>Full player and schedule →</td><td>Label for that link.</td></tr>
+          <tr><td>data-show-dial</td><td>true</td><td>FM dial on the card. Needs <code>data-frequency</code>.</td></tr>
+          <tr><td>data-show-schedule</td><td>true</td><td>Today's schedule strip. Hides itself if the station publishes none.</td></tr>
+          <tr><td>data-show-listeners</td><td>true</td><td>Live listener count. Hides itself if the station doesn't publish one.</td></tr>
+          <tr><td>data-show-volume</td><td>true</td><td>Volume slider. Always hidden on iOS.</td></tr>
+          <tr><td>data-poll-interval</td><td>20</td><td>Metadata poll seconds. Floor of 10.</td></tr>
+          <tr><td>data-fonts</td><td>auto</td><td><code>auto</code> self-hosts the web fonts; <code>none</code> uses system fonts and makes zero extra requests.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>THEMING</h2>
+      <p class="lede">
+        The widget renders in a shadow root, so host page CSS can't reach it and its CSS can't reach your page. Custom properties are the one channel left open on purpose — set them on the container
+        and they cascade in.
+      </p>
+      <pre><code>#wvvy-player {
+  --wvvy-accent: #f0a500;
+  --wvvy-bg: #101820;
+  --wvvy-panel: #18222c;
+  --wvvy-text: #eef2f7;
+  --wvvy-muted: #8fa0b3;
+  --wvvy-line: #2c3a4b;
+  --wvvy-live: #c4452f;
+}</code></pre>
+
+      <h2>NOTES</h2>
+      <ul class="lede">
+        <li>Multiple widgets on one page are fine. Starting one stops the others, so nobody hears two offset copies of the same stream.</li>
+        <li>Polling pauses while the tab is hidden or the widget is scrolled out of view — it runs on your page against someone else's server.</li>
+        <li>Fonts are self-hosted alongside the bundle. The widget never calls Google Fonts from your visitors' browsers.</li>
+        <li>No cookies, no analytics, no third-party requests beyond the station's own API and audio mount.</li>
+      </ul>
+
+      <footer>
+        MIT · <a href="https://github.com/wvvy967/wvvy-player-widget">github.com/wvvy967/wvvy-player-widget</a> · Built for
+        <a href="https://wvvy.org">WVVY 96.7 LPFM</a>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Builder: re-mount the preview whenever an option changes, and keep the
+      // snippet in sync with exactly what's on screen.
+      const $ = (id) => document.getElementById(id);
+      const defaults = { variant: 'bar', theme: 'brutalist', accent: '#c4ff3d', frequency: '96.7' };
+      let widget = null;
+
+      function readOptions() {
+        return {
+          variant: $('c-variant').value,
+          theme: $('c-theme').value,
+          accent: $('c-accent').value,
+          frequency: $('c-freq').value.trim(),
+          link: 'https://wvvy.org',
+          name: 'WVVY-LP',
+          location: "Tisbury · Martha's Vineyard · 100W"
+        };
+      }
+
+      function render() {
+        const opts = readOptions();
+        $('stage').dataset.bg = $('c-bg').value;
+
+        widget?.destroy();
+        const host = document.createElement('div');
+        $('preview').replaceChildren(host);
+        widget = window.WvvyPlayer.mount(host, opts);
+
+        // Only emit attributes that differ from the defaults — a snippet full of
+        // redundant values is harder to read and harder to change later.
+        const attrs = ['data-variant="' + opts.variant + '"'];
+        if (opts.theme !== defaults.theme) attrs.push('data-theme="' + opts.theme + '"');
+        if (opts.accent.toLowerCase() !== defaults.accent) attrs.push('data-accent="' + opts.accent + '"');
+        if (opts.frequency) attrs.push('data-frequency="' + opts.frequency + '"');
+        attrs.push('data-name="WVVY-LP"');
+        attrs.push('data-link="https://wvvy.org"');
+
+        $('snippet').textContent = '<div id="wvvy-player"\n  ' + attrs.join('\n  ') + '></div>\n<script src="https://wvvy.org/widget/player.js" async><\/script>';
+      }
+
+      // The bundle mounts on DOMContentLoaded; wait for it to publish its API.
+      function boot() {
+        if (!window.WvvyPlayer) return setTimeout(boot, 30);
+        // Retire the auto-mounted widget before the builder takes over, so the
+        // page never has two players polling at once.
+        window.WvvyPlayer.widgets.forEach((w) => w.destroy());
+        for (const id of ['c-variant', 'c-theme', 'c-accent', 'c-freq', 'c-bg']) {
+          $(id).addEventListener('input', render);
+        }
+        $('copy').addEventListener('click', async () => {
+          await navigator.clipboard.writeText($('snippet').textContent);
+          $('copy').textContent = 'Copied';
+          setTimeout(() => ($('copy').textContent = 'Copy'), 1400);
+        });
+        render();
+      }
+      boot();
+    </script>
+  </body>
+</html>

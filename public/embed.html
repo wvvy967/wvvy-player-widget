@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live radio player</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      /* Transparent so the host page's own background shows through the iframe. */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+      #wvvy-player {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Iframe fallback for site builders that strip <script> from user content
+      (Squarespace, Wix, and Google Sites do this on some plans). It loads the
+      same bundle as the script embed and takes the same options, passed as query
+      parameters instead of data-* attributes:
+
+        embed.html?variant=card&theme=modern&frequency=96.7
+
+      Trade-off: lock-screen, notification, and CarPlay controls are bound by
+      browsers to the top-level document, so they don't surface from inside a
+      cross-origin iframe. Use the script embed when you can.
+    -->
+    <div id="wvvy-player"></div>
+    <script src="./player.js"></script>
+    <script>
+      // Query string → data-* attributes. Done before the bundle's DOMContentLoaded
+      // handler runs, so the container is already configured when it mounts.
+      (function () {
+        var el = document.getElementById('wvvy-player');
+        new URLSearchParams(location.search).forEach(function (value, key) {
+          // Only kebab/lower-case alphanumeric keys, so a crafted URL can't set
+          // arbitrary attributes on the element.
+          if (/^[a-z][a-z0-9-]*$/.test(key)) el.setAttribute('data-' + key, value);
+        });
+      })();
+    </script>
+    <script>
+      // Report our rendered height to the embedding page. A host that wants a
+      // self-sizing iframe can listen for it; hosts that don't just ignore it.
+      (function () {
+        function post() {
+          var h = document.documentElement.scrollHeight;
+          parent.postMessage({ type: 'wvvy-player:height', height: h }, '*');
+        }
+        window.addEventListener('load', post);
+        if (window.ResizeObserver) new ResizeObserver(post).observe(document.documentElement);
+      })();
+    </script>
+  </body>
+</html>

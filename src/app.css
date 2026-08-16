@@ -1,0 +1,293 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Widget stylesheet. This is compiled into the JS bundle and attached to the
+   widget's shadow root — it is never added to the host document.
+
+   Because we live in a shadow tree, the whole defensive apparatus a light-DOM
+   embed needs (no preflight, `important: true`, `all: initial` at high
+   specificity, a rem floor to survive `html { font-size: 62.5% }`) is
+   unnecessary. Host page CSS simply cannot reach in. Tailwind v4's preflight
+   even targets `:host` alongside `html`, so we get the resets scoped to our
+   tree for free.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@import 'tailwindcss';
+
+/* Token registration. These values make the utilities exist (`bg-ink` compiles
+   to `background-color: var(--color-ink)`); the *live* values are set on :host
+   and the theme wrappers below, which is what makes runtime theming work. */
+@theme {
+  --color-ink: #0a0908;
+  --color-panel: #141210;
+  --color-raised: #1c1a18;
+  --color-line: #2e2a26;
+  --color-bone: #ece5d8;
+  --color-muted: #8b867c;
+  --color-accent: #c4ff3d;
+  --color-accent-ink: #0a0908;
+  --color-live: #c43a1f;
+  --color-warn: #f0a500;
+
+  --font-display: 'WVVY Stencil', 'Big Shoulders Stencil', Impact, sans-serif;
+  --font-label: 'WVVY Elite', 'Special Elite', 'Courier New', monospace;
+  --font-body: 'WVVY Mono', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* ─── Host element ──────────────────────────────────────────────────────────
+   `all: initial` blocks inherited properties (colour, letter-spacing,
+   text-transform…) from leaking in through the host element. Per the CSS
+   Scoping spec, rules in the outer document always beat `:host` rules, so this
+   cannot override sizing or layout the host site sets on the container.
+
+   Every token is `var(--wvvy-*, <default>)` so a host can retheme the widget
+   from their own stylesheet — custom properties pierce the shadow boundary,
+   which is the one channel we deliberately leave open.
+   ─────────────────────────────────────────────────────────────────────────── */
+:host {
+  all: initial;
+  display: block;
+
+  --color-ink: var(--wvvy-bg, #0a0908);
+  --color-panel: var(--wvvy-panel, #141210);
+  --color-raised: var(--wvvy-raised, #1c1a18);
+  --color-line: var(--wvvy-line, #2e2a26);
+  --color-bone: var(--wvvy-text, #ece5d8);
+  --color-muted: var(--wvvy-muted, #8b867c);
+  --color-accent: var(--wvvy-accent, #c4ff3d);
+  --color-accent-ink: var(--wvvy-accent-text, #0a0908);
+  --color-live: var(--wvvy-live, #c43a1f);
+  --color-warn: var(--wvvy-warn, #f0a500);
+
+  --wvvy-radius: 0px;
+  --wvvy-border-width: 1px;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-bone);
+  -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
+}
+
+/* ─── Modern theme ──────────────────────────────────────────────────────────
+   The softer dark card: navy-black ground, amber accent, rounded corners,
+   system sans for headings. Applied to the wrapper inside the shadow root, so
+   switching themes never mutates the host page's markup.
+   ─────────────────────────────────────────────────────────────────────────── */
+.theme-modern {
+  --color-ink: var(--wvvy-bg, #141b27);
+  --color-panel: var(--wvvy-panel, #1b2532);
+  --color-raised: var(--wvvy-raised, #212d3c);
+  --color-line: var(--wvvy-line, #2c3a4b);
+  --color-bone: var(--wvvy-text, #eef2f7);
+  --color-muted: var(--wvvy-muted, #8fa0b3);
+  --color-accent: var(--wvvy-accent, #f0a500);
+  --color-accent-ink: var(--wvvy-accent-text, #141b27);
+  --color-live: var(--wvvy-live, #c4452f);
+  --color-warn: var(--wvvy-warn, #f0a500);
+
+  --wvvy-radius: 14px;
+  --wvvy-border-width: 1px;
+
+  /* System sans for headings reads correctly on every platform and costs no
+     bytes — the mockup's geometric sans isn't worth a font request here. */
+  --font-display: var(--wvvy-font-display, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  --font-label: var(--wvvy-font-label, 'WVVY Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+  --font-body: var(--wvvy-font-body, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+
+  font-family: var(--font-body);
+}
+
+.theme-brutalist {
+  --font-display: var(--wvvy-font-display, 'WVVY Stencil', 'Big Shoulders Stencil', Impact, sans-serif);
+  --font-label: var(--wvvy-font-label, 'WVVY Elite', 'Special Elite', 'Courier New', monospace);
+  --font-body: var(--wvvy-font-body, 'WVVY Mono', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+}
+
+/* ─── Type roles ─────────────────────────────────────────────────────────── */
+.t-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  line-height: 0.9;
+}
+.theme-brutalist .t-display {
+  font-weight: 900;
+  line-height: 0.85;
+}
+.theme-modern .t-display {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.t-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+}
+.theme-modern .t-label {
+  letter-spacing: 0.18em;
+  font-weight: 500;
+}
+
+/* ─── Surfaces ───────────────────────────────────────────────────────────── */
+.surface {
+  background-color: var(--color-ink);
+  border: var(--wvvy-border-width) solid var(--color-line);
+  border-radius: var(--wvvy-radius);
+}
+.theme-modern .surface {
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.85);
+}
+
+/* Corner notches — the brutalist frame from wvvy.org. Modern theme opts out. */
+.theme-brutalist .notched {
+  position: relative;
+}
+.theme-brutalist .notched::before,
+.theme-brutalist .notched::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--color-accent);
+  pointer-events: none;
+}
+.theme-brutalist .notched::before {
+  top: -5px;
+  left: -5px;
+  border-right: none;
+  border-bottom: none;
+}
+.theme-brutalist .notched::after {
+  bottom: -5px;
+  right: -5px;
+  border-left: none;
+  border-top: none;
+}
+
+/* CRT scanlines, brutalist only. Cheap gradient, no extra paint layer. */
+.theme-brutalist .scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.028) 0px, rgb(255 255 255 / 0.028) 1px, transparent 1px, transparent 3px);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes wvvy-eq {
+  0%,
+  100% {
+    transform: scaleY(0.18);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.eq-bar {
+  transform-origin: bottom;
+}
+.eq-bar[data-active='true'] {
+  animation: wvvy-eq 0.9s ease-in-out infinite;
+}
+
+@keyframes wvvy-on-air {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 var(--color-live),
+      0 0 18px 2px color-mix(in srgb, var(--color-live) 55%, transparent);
+    opacity: 1;
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px transparent,
+      0 0 4px 0 transparent;
+    opacity: 0.55;
+  }
+}
+.on-air-dot[data-live='true'] {
+  animation: wvvy-on-air 1.6s ease-in-out infinite;
+}
+
+@keyframes wvvy-sweep {
+  0%,
+  100% {
+    transform: translateX(-2%);
+  }
+  50% {
+    transform: translateX(102%);
+  }
+}
+.dial-sweep {
+  animation: wvvy-sweep 8s ease-in-out infinite;
+}
+
+@keyframes wvvy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  animation: wvvy-spin 0.8s linear infinite;
+}
+
+/* ─── Volume slider ──────────────────────────────────────────────────────── */
+.vol {
+  appearance: none;
+  background: transparent;
+  height: 18px;
+  cursor: pointer;
+}
+.vol::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bone) 22%, transparent);
+}
+.vol::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bone) 22%, transparent);
+}
+.vol::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  border: none;
+}
+.vol::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  border: none;
+}
+.theme-brutalist .vol::-webkit-slider-thumb,
+.theme-brutalist .vol::-moz-range-thumb {
+  border-radius: 0;
+}
+
+/* ─── Focus ──────────────────────────────────────────────────────────────── */
+:where(button, a, input):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Respect the viewer's motion preference — this runs on other people's sites,
+   where an animation opt-out is theirs to make, not ours. */
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar[data-active='true'],
+  .on-air-dot[data-live='true'],
+  .dial-sweep,
+  .spinner {
+    animation: none !important;
+  }
+  .eq-bar[data-active='true'] {
+    transform: scaleY(0.55);
+  }
+}

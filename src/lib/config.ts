@@ -107,8 +107,10 @@ function text(value: unknown): string | undefined {
   return v === '' ? undefined : v;
 }
 
-export type ResolvedConfig = Required<Pick<PlayerWidgetConfig, 'station' | 'shortcode' | 'variant' | 'theme' | 'linkLabel' | 'showDial' | 'showSchedule' | 'showListeners' | 'showVolume' | 'pollInterval' | 'fonts'>> &
-  Pick<PlayerWidgetConfig, 'accent' | 'stream' | 'name' | 'tagline' | 'frequency' | 'location' | 'link' | 'assetBase'>;
+export type ResolvedConfig = Required<
+  Pick<PlayerWidgetConfig, 'station' | 'shortcode' | 'variant' | 'theme' | 'linkLabel' | 'showDial' | 'showSchedule' | 'showListeners' | 'showVolume' | 'pollInterval' | 'fonts'>
+> &
+  Pick<PlayerWidgetConfig, 'accent' | 'stream' | 'name' | 'tagline' | 'description' | 'frequency' | 'location' | 'link' | 'assetBase'>;
 
 /** Normalise raw config (from `data-*` attributes or a JS object) into resolved, validated values. */
 export function resolveConfig(input: PlayerWidgetConfig = {}): ResolvedConfig {
@@ -121,6 +123,7 @@ export function resolveConfig(input: PlayerWidgetConfig = {}): ResolvedConfig {
     stream: validUrl('stream', input.stream),
     name: text(input.name),
     tagline: text(input.tagline),
+    description: text(input.description),
     frequency: text(input.frequency),
     location: text(input.location),
     link: validUrl('link', input.link),
