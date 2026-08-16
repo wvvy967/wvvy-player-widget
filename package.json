@@ -1,0 +1,66 @@
+{
+  "name": "wvvy-player-widget",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Embeddable live-radio player widget for any AzuraCast station. Single self-contained script, Shadow DOM isolated.",
+  "keywords": ["azuracast", "radio", "player", "widget", "embed", "icecast", "svelte"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pjaudiomv/wvvy-player-widget.git"
+  },
+  "homepage": "https://wvvy.org/widget/",
+  "files": ["dist/module.js", "dist/module.d.ts"],
+  "module": "./dist/module.js",
+  "types": "./dist/module.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/module.js",
+      "types": "./dist/module.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && npm run build:lib",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "preview": "vite preview",
+    "lint": "prettier --check vite.config.ts vite.lib.config.ts tsconfig.json src && eslint vite.config.ts vite.lib.config.ts src && svelte-check --tsconfig ./tsconfig.json",
+    "format": "prettier --write vite.config.ts vite.lib.config.ts tsconfig.json src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "all": "npm run format && npm run lint && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.60.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@tailwindcss/vite": "^4.3.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/svelte": "^5.3.1",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^26.1.0",
+    "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.17.1",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^4.0.1",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "svelte": "^5.55.9",
+    "svelte-check": "^4.4.8",
+    "svelte-eslint-parser": "^1.7.1",
+    "tailwindcss": "^4.3.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.59.4",
+    "unplugin-dts": "^1.0.1",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
